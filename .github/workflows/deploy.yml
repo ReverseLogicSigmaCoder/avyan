@@ -20,7 +20,8 @@ jobs:
 
     - name: Clone and Build Liboqs (Quantum Crypto)
       run: |
-        git clone https://github.com
+        git clone https://github/open-quantum-safe/liboqs.git
+.com
         cd liboqs
         mkdir build && cd build
         cmake -DBUILD_SHARED_LIBS=ON ..
