@@ -23,3 +23,4 @@ done
 echo "========================================="
 echo "[SUCCESS] Akash-Rakshak Protection Active!"
 echo "========================================="
+echo "[UPDATE] New security patch applied by ReverseLogicSigmaCoder"
