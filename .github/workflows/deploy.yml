@@ -1,0 +1,37 @@
+name: Quantum-Proof & Hardware Shield Setup
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Install System Dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y build-essential cmake python3 python3-pip openssl libssl-dev libusb-1.0-0-dev pcscd libccid pcsc-tools
+
+    - name: Clone and Build Liboqs (Quantum Crypto)
+      run: |
+        git clone https://github.com
+        cd liboqs
+        mkdir build && cd build
+        cmake -DBUILD_SHARED_LIBS=ON ..
+        make
+        sudo make install
+
+    - name: Install Python OQS Wrapper
+      run: |
+        pip3 install oqs
+
+    - name: Verify Setup
+      run: |
+        python3 -c "import oqs; print('Quantum-Safe Cryptography Loaded Successfully!')"
+        pcscd --version
