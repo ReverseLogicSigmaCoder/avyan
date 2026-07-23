@@ -1,0 +1,20 @@
+{
+    "report_metadata": {
+        "organization_target": "example.com",
+        "timestamp_utc": "2026-07-23 13:06:21 UTC",
+        "reporter_contact": "ravindrachoudhary9653@gmail.com",
+        "standard": "CERT-In Coordinated Vulnerability Disclosure (CVD)"
+    },
+    "finding_details": {
+        "title": "HTTP Security Posture & Header Configuration Audit",
+        "monitored_domain": "example.com",
+        "discovered_subdomains_count": 0,
+        "status": "CVD Hardening Flagged",
+        "summary": "Subdomains: 0, Missing Headers: 4"
+    },
+    "remediation_guidelines": [
+        "Implement Strict-Transport-Security (HSTS) header.",
+        "Define strict Content-Security-Policy (CSP).",
+        "Set X-Frame-Options to DENY or SAMEORIGIN."
+    ]
+}

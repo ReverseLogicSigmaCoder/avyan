@@ -1,0 +1,30 @@
+{
+    "metadata": {
+        "title": "CERT-In Compliant Cyber Threat Intelligence Advisory",
+        "generated_by": "AVYAN - SUDARSHAN SOAR Engine",
+        "timestamp": "2026-07-23 14:15:27 UTC",
+        "compliance_standard": "CERT-In Incident Handling & CVD Standards"
+    },
+    "monitored_scope": {
+        "target_sector": "Strategic & Government Enterprises Baseline",
+        "primary_asset": "example.com"
+    },
+    "threat_summary": {
+        "total_incidents_logged": 3,
+        "threat_classification": "Threat Intelligence Feed Sync"
+    },
+    "actionable_advisories": [
+        {
+            "cve_id": "PYSEC-2025-19",
+            "summary": "No summary provided."
+        },
+        {
+            "cve_id": "PYSEC-2024-115",
+            "summary": "No summary provided."
+        },
+        {
+            "cve_id": "N/A",
+            "summary": "No summary provided."
+        }
+    ]
+}

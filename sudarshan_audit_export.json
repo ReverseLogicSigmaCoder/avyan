@@ -1,0 +1,11 @@
+[
+    {
+        "id": 1,
+        "timestamp": "2026-07-23 12:07:23 UTC",
+        "target_identity": "ravindrachoudhary9653@gmail.com",
+        "monitored_domain": "nic.in",
+        "subdomain_count": 0,
+        "ioc_status": "IOC Match Detected",
+        "raw_summary": "Subdomains: 0, Threats: 1"
+    }
+]
