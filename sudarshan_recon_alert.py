@@ -69,8 +69,8 @@ def scan_target_subdomains(target_domain):
 
 if __name__ == "__main__":
     init_db()
-    # Test target domain
-    target = "example.com"
+    # Active public target domain
+    target = "wikipedia.org"
     found = scan_target_subdomains(target)
     
     if found:
