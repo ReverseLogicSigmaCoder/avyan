@@ -30,7 +30,7 @@ jobs:
 
       - name: Execute Dark Web Threat Scraper
         run: |
-          python darkweb_scraper.py
+          python sudarshan_soar_engine.py
 
 
 name: SUDARSHAN Automated Threat Engine
