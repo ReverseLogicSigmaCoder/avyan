@@ -164,3 +164,10 @@ def fetch_threat_intelligence():
 if __name__ == "__main__":
     fetch_threat_intelligence()
 
+
+import os
+import requests
+
+# ----------------- TELEGRAM CONFIGURATION -----------------
+TELEGRAM_BOT_TOKEN = "8627150645:AAFs3xoo0z2odb7cZgw2Em80s8H2gOb-oKE"
+TELEGRAM_CHAT_ID = "7459821254"
