@@ -51,3 +51,16 @@ v                                 v
 ## 🔒 Ethical & Legal Compliance
 
 Project AVYAN strictly adheres to **Coordinated Vulnerability Disclosure (CVD)** guidelines, passive OSINT principles, and non-intrusive threat monitoring practices.
+
+# PROJECT AVYAN - SUDARSHAN Security Engine
+
+Autonomous Cyber Defense & Asset Exposure Monitoring Engine.
+
+## 🚀 Key Modules
+- **Dynamic Asset Exposure Audit:** Real-time path checking for exposed environment & configuration files.
+- **SOAR Telegram Alerts:** Instant alert dispatch via Telegram Bot API upon discovering critical findings.
+- **Automated CI/CD Security Audit:** Integrated GitHub Actions workflow for static code security analysis.
+
+## 🛠️ Usage
+```bash
+python sudarshan_production_engine.py
