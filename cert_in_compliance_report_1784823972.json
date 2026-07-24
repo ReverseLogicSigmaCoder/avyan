@@ -1,0 +1,11 @@
+{
+    "report_id": "AVYAN-CERTIN-1784823972",
+    "timestamp": "2026-07-23 21:56:12 IST",
+    "compliance_standard": "CERT-In Cyber Security Guidelines",
+    "system_status": "SECURE",
+    "audit_summary": {
+        "scanned_endpoints": 12,
+        "threats_found": 0,
+        "integrity_hash": null
+    }
+}
