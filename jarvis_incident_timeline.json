@@ -6,5 +6,21 @@
             "targets_scanned": 4,
             "risk_score": 100
         }
+    },
+    {
+        "timestamp": "2026-07-24 08:33:29 IST",
+        "event_type": "JARVIS_FULL_AUDIT",
+        "details": {
+            "targets_scanned": 4,
+            "risk_score": 100
+        }
+    },
+    {
+        "timestamp": "2026-07-24 08:33:35 IST",
+        "event_type": "JARVIS_FULL_AUDIT",
+        "details": {
+            "targets_scanned": 4,
+            "risk_score": 100
+        }
     }
 ]
