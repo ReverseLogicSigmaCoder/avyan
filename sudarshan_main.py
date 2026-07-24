@@ -1,7 +1,6 @@
 import os
 import sys
 import json
-import subprocess
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'modules'))
 
@@ -10,31 +9,43 @@ try:
 except ImportError:
     test_telegram = None
 
-def run_real_scan_and_alert():
-    print("\n[+] Initializing Real-Time Vulnerability & Mesh Scan...")
+try:
+    from modules import vdp_passive_engine
+except ImportError:
+    vdp_passive_engine = None
+
+def run_authorized_vdp_scan():
+    print("\n==================================================")
+    print("      SUDARSHAN VDP PASSIVE AUDIT ENGINE          ")
+    print("==================================================")
+    target = input("Enter Authorized Target Domain (e.g. example.com): ").strip()
     
-    # Example scanning logic gathering system findings
-    findings = []
+    if not target:
+        print("[-] Target Domain required!")
+        return
+
+    print(f"\n[+] Initializing Passive Reconnaissance on: {target}...")
     
-    # Check open sockets / network listeners
-    try:
-        from modules import day86_fusion, jarvis_ops
-        print("[+] Executing JARVIS Mesh Inspection...")
-        # Simulating active vulnerability findings count
-        vuln_count = 0 
-        open_ports = [80, 443, 5000]
+    if vdp_passive_engine:
+        results = vdp_passive_engine.run_passive_audit(target)
+        vuln_count = len(results.get("vulnerabilities", []))
         
-        msg = f"🛡️ [SUDARSHAN SYSTEM AUDIT REPORT]\n" \
+        print(f"\n[+] Audit Completed!")
+        print(f"📊 Missing Security Headers / Findings: {vuln_count}")
+        
+        # Build Telegram Payload
+        msg = f"🛡️ [SUDARSHAN VDP PASSIVE AUDIT REPORT]\n" \
               f"----------------------------------------\n" \
-              f"📊 Open Monitored Ports: {open_ports}\n" \
-              f"⚠️ Vulnerabilities Detected: {vuln_count} Critical\n" \
-              f"⚡ Status: Zero-Day Shield Active & Clean"
+              f"🌐 Target: {target}\n" \
+              f"⚠️ Findings Identified: {vuln_count}\n" \
+              f"📄 Report Status: Formatted for CERT-In / NCIIPC Submission\n" \
+              f"⚡ Engine: Passive Recon Mode Active"
               
         if test_telegram:
             test_telegram.send_test_alert(msg)
-            print("[+] Live Vulnerability Scan Report Sent To Telegram!")
-    except Exception as e:
-        print(f"[-] Scan Error: {e}")
+            print("[+] Scan Telemetry Dispatched To Telegram Successfully!")
+    else:
+        print("[-] Passive Scanner Module Not Found.")
 
 def main_menu():
     print("==================================================")
@@ -42,20 +53,21 @@ def main_menu():
     print("            [ Master Command & Control Center ]")
     print("==================================================")
     print("\nSelect Engine Execution Pipeline:")
-    print("  1. Run Real Vulnerability & Mesh Scan (Sends Detailed Findings)")
-    print("  2. Dispatch Telegram Test Alert")
+    print("  1. Run Authorized VDP Passive Scan (Generates VDP Findings)")
+    print("  2. Dispatch Live Telegram Test Alert")
     print("  3. Exit Control Room")
 
     choice = input("\nSUDARSHAN Console > ").strip()
 
     if choice == '1':
-        run_real_scan_and_alert()
+        run_authorized_vdp_scan()
     elif choice == '2':
         if test_telegram:
             test_telegram.send_test_alert("🚨 [SUDARSHAN ALERT]: Manual Test Trigger Successful!")
     elif choice == '3':
-        print("\n[+] Exiting. System Shield Active.")
+        print("\n[+] Exiting Control Room. Shield Active.")
         sys.exit(0)
 
 if __name__ == "__main__":
     main_menu()
+
