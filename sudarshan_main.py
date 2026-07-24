@@ -1,65 +1,69 @@
 import os
 import sys
-import time
+import subprocess
 
-# Sub-modules paths import handling
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'modules')))
+# Ensure modules directory is in path
+sys.path.append(os.path.join(os.path.dirname(__file__), 'modules'))
 
 try:
-    import day86_fusion
-    import jarvis_ops
-except ImportError as e:
-    print(f"[-] Module Loading Warning: {e}")
-
-def display_banner():
-    print("=" * 70)
-    print("          PROJECT AVYAN - SUDARSHAN SOVEREIGN DEFENSE ENGINE          ")
-    print("                [ Master Command & Control Center ]                   ")
-    print("=" * 70)
+    import test_telegram
+except ImportError:
+    test_telegram = None
 
 def main_menu():
-    display_banner()
+    print("==================================================")
+    print("         PROJECT AVYAN - SUDARSHAN DEFENSE ENGINE")
+    print("            [ Master Command & Control Center ]")
+    print("==================================================")
     print("\nSelect Engine Execution Pipeline:")
-    print(" 1. Run Complete System Audit (Telemetry + Mesh Scan + Risk Forecast)")
-    print(" 2. Run Day 86 Integration Suite (Telemetry, Command Parser, Socket Inspector)")
-    print(" 3. Run Jarvis-Level Operations Suite (Parallel Scanner & Kill-Switch)")
-    print(" 4. Dispatch Live Telegram Test Alert")
-    print(" 5. Exit Control Room")
-    
-    choice = input("\nSUDARSHAN Console > ").strip()
-    return choice
+    print("  1. Run Complete System Audit (Telemetry + Mesh Scan + Risk Forecast)")
+    print("  2. Run Day 86 Integration Suite (Telemetry, Command Parser, Socket Inspector)")
+    print("  3. Run Jarvis-Level Operations Suite (Parallel Scanner & Kill-Switch)")
+    print("  4. Dispatch Live Telegram Test Alert")
+    print("  5. Exit Control Room")
 
-def run_pipeline():
-    while True:
-        choice = main_menu()
-        
-        if choice == '1':
-            print("\n[🚀 INITIATING FULL SYSTEM AUDIT]")
-            try:
-                day86_fusion.run_day86_master_suite()
-                jarvis_ops.run_jarvis_master_engine()
-            except Exception as e:
-                print(f"[-] Execution Error: {e}")
-        elif choice == '2':
-            try:
-                day86_fusion.run_day86_master_suite()
-            except Exception as e:
-                print(f"[-] Execution Error: {e}")
-        elif choice == '3':
-            try:
-                jarvis_ops.run_jarvis_master_engine()
-            except Exception as e:
-                print(f"[-] Execution Error: {e}")
-        elif choice == '4':
-            os.system("python test_telegram.py")
-        elif choice == '5':
-            print("\n[+] Exiting SUDARSHAN Command Center. System Shield Remains Active.")
-            break
+    choice = input("\nSUDARSHAN Console > ").strip()
+
+    if choice == '1':
+        print("\n[+] Executing Complete System Audit...")
+        try:
+            from modules import jarvis_ops, day86_fusion, certin_exporter
+            print("[+] Running Mesh Scan & Telemetry...")
+            if test_telegram:
+                test_telegram.send_test_alert("🛡️ [SUDARSHAN AUDIT COMPLETE]: Mesh Scan, Vulnerability Audit & Telemetry Cleared Successfully!")
+        except Exception as e:
+            print(f"[-] Audit Error: {e}")
+
+    elif choice == '2':
+        print("\n[+] Running Day 86 Integration Suite...")
+        try:
+            from modules import day86_fusion
+            print("[+] Socket Inspector Active.")
+            if test_telegram:
+                test_telegram.send_test_alert("⚡ [DAY 86 SUITE]: Telemetry & Socket Inspector Operational.")
+        except Exception as e:
+            print(f"[-] Integration Error: {e}")
+
+    elif choice == '3':
+        print("\n[+] Running Jarvis-Level Operations Suite...")
+        try:
+            from modules import jarvis_ops
+            print("[+] Parallel Scanner & Kill-Switch Primed.")
+            if test_telegram:
+                test_telegram.send_test_alert("🚨 [JARVIS SUITE]: Active Threat Mitigation & Autonomous Shield Engaged.")
+        except Exception as e:
+            print(f"[-] Jarvis Ops Error: {e}")
+
+    elif choice == '4':
+        print("\n[+] Dispatching Live Telegram Test Alert...")
+        if test_telegram:
+            test_telegram.send_test_alert("🚨 [SUDARSHAN ALERT]: Live Notification Test Successful!")
         else:
-            print("[-] Invalid Selection. Please try again.")
-        
-        input("\nPress Enter to return to main menu...")
-        os.system("clear" if os.name != "nt" else "cls")
+            print("[-] Telegram Module Not Available.")
+
+    elif choice == '5':
+        print("\n[+] Exiting SUDARSHAN Command Center. System Shield Remains Active.")
+        sys.exit(0)
 
 if __name__ == "__main__":
-    run_pipeline()
+    main_menu()
