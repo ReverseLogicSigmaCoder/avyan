@@ -7,17 +7,18 @@ try:
     from modules.sarathi_logic_auditor import generate_sarathi_logic_report
     from modules.taint_tracker import run_taint_analysis
     from modules.ai_fuzzer import AIGuidedFuzzer
+    from modules.dast_scanner import run_dast_scan
 except ImportError as e:
     print(f"[!] Warning: Sub-module import issue: {e}")
 
-# Direct Exporter Definition (No Import Errors)
+# Direct Exporter Definition
 def export_advisory_to_file(advisory_dict: dict, filename: str = "sudarshan_master_advisory.json"):
     """Saves structured advisory to a clean JSON file with audit logging."""
     with open(filename, "w") as f:
         json.dump(advisory_dict, f, indent=4)
     print(f"[+] Master CERT-In Advisory successfully exported to: {filename}")
 
-# Existing Passive Scan Logic
+# Passive Recon Targets
 AUTHORIZED_VDP_TARGETS = [
     "example.com",
     "scanme.nmap.org"
@@ -37,12 +38,12 @@ Status: PASSIVE_ANALYSIS_COMPLETED
         f.write(report_content)
     print("[+] Passive scan complete. Saved to scan_report.txt")
 
-def execute_sudarshan_master_audit(target_file="sample_app.py"):
+def execute_sudarshan_master_audit(target_file="sample_app.py", target_url="https://example.com"):
     print("="*60)
     print("      SUDARSHAN SOVEREIGN SHIELD - MASTER AUDIT CORE       ")
     print("="*60)
     
-    # 1. Run Existing Passive Scan
+    # 1. Run Passive Recon
     run_passive_scan()
 
     # 2. Check or create target file for logic/taint testing
@@ -61,27 +62,32 @@ def handle_user_profile(user_id):
         code_content = f.read()
 
     # 3. Run LLM AST Logic Auditor
-    print("\n[+] [1/3] Running SARATHI AST Semantic Logic Auditor...")
+    print("\n[+] [1/4] Running SARATHI AST Semantic Logic Auditor...")
     logic_results = generate_sarathi_logic_report(target_file, code_content)
 
     # 4. Run Source-to-Sink Taint Engine
-    print("\n[+] [2/3] Running Source-to-Sink Taint Tracking Engine...")
+    print("\n[+] [2/4] Running Source-to-Sink Taint Tracking Engine...")
     taint_results = run_taint_analysis(code_content)
 
-    # 5. Compile Master CERT-In / NCIIPC Compliance Advisory
-    print("\n[+] [3/3] Compiling Master CERT-In / NCIIPC Compliance Advisory...")
+    # 5. Run DAST Live Web Audit
+    print("\n[+] [3/4] Running DAST Live Web Audit Engine...")
+    dast_results = run_dast_scan(target_url)
+
+    # 6. Compile Master CERT-In / NCIIPC Compliance Advisory
+    print("\n[+] [4/4] Compiling Master CERT-In / NCIIPC Compliance Advisory...")
     master_summary = {
         "engine": "SUDARSHAN AUTONOMOUS DEFENSIVE ENGINE",
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "target_file": target_file,
+        "target_url": target_url,
         "logic_audit_summary": logic_results,
-        "taint_violations": taint_results
+        "taint_violations": taint_results,
+        "dast_audit_summary": dast_results
     }
 
     # Export final master report
     export_advisory_to_file(master_summary, "sudarshan_master_advisory.json")
-    print("\n[SUCCESS] Master Scan Complete! All systems nominal.")
+    print("\n[SUCCESS] Master Scan Complete! All operational modules executed successfully.")
 
 if __name__ == "__main__":
     execute_sudarshan_master_audit()
-
