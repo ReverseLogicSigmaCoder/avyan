@@ -2,10 +2,12 @@ import os
 import re
 import json
 import logging
+import urllib.request
+import urllib.error
 from datetime import datetime, timezone
 
 # ---------------------------------------------------------
-# 1. AUDIT TRAIL & VERIFICATION LOGGER
+# 1. AUDIT TRAIL & LOGGING
 # ---------------------------------------------------------
 logging.basicConfig(
     filename="sudarshan_audit_trail.log",
@@ -21,83 +23,96 @@ def log_audit_event(event_type: str, details: str):
 
 
 def validate_scope(target_domain: str, authorized_scope: list) -> bool:
-    """Check if target domain is strictly within the allowed disclosure scope."""
     if target_domain in authorized_scope:
         log_audit_event("SCOPE_VALIDATION", f"Target '{target_domain}' is AUTHORIZED.")
         return True
     else:
-        log_audit_event("SCOPE_VIOLATION", f"Target '{target_domain}' BLOCKED (Out of Scope).")
+        log_audit_event("SCOPE_VIOLATION", f"Target '{target_domain}' BLOCKED.")
         return False
 
 
 # ---------------------------------------------------------
-# 2. EVIDENCE & METADATA SANITIZER (PII REDACTION)
+# 2. REAL LIVE PASSIVE HEADER ANALYZER (HTTP OSINT)
+# ---------------------------------------------------------
+RECOMMENDED_HEADERS = [
+    "Strict-Transport-Security",
+    "Content-Security-Policy",
+    "X-Frame-Options",
+    "X-Content-Type-Options"
+]
+
+def analyze_live_passive_headers(target_domain: str) -> dict:
+    """Fetch public headers without sending malicious payloads (Passive OSINT)."""
+    url = f"https://{target_domain}"
+    log_audit_event("PASSIVE_SCAN_START", f"Fetching public headers for {url}")
+    
+    missing_headers = []
+    headers_received = {}
+    
+    try:
+        req = urllib.request.Request(
+            url, 
+            headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+        )
+        # Timeout set to 10 seconds to avoid hung requests
+        with urllib.request.urlopen(req, timeout=10) as response:
+            response_headers = response.info()
+            for header_name in response_headers.keys():
+                headers_received[header_name] = response_headers[header_name]
+
+            # Check for missing standard security headers
+            for sec_header in RECOMMENDED_HEADERS:
+                if sec_header.lower() not in [h.lower() for h in response_headers.keys()]:
+                    missing_headers.append(sec_header)
+                    
+    except urllib.error.URLError as e:
+        log_audit_event("PASSIVE_SCAN_ERROR", f"Network error for {target_domain}: {str(e)}")
+        return {"status": "ERROR", "reason": str(e)}
+    except Exception as e:
+        log_audit_event("PASSIVE_SCAN_ERROR", f"Execution error for {target_domain}: {str(e)}")
+        return {"status": "ERROR", "reason": str(e)}
+
+    return {
+        "status": "SUCCESS",
+        "domain": target_domain,
+        "missing_headers": missing_headers,
+        "raw_headers": headers_received
+    }
+
+
+# ---------------------------------------------------------
+# 3. EVIDENCE SANITIZER (PII REDACTION)
 # ---------------------------------------------------------
 def sanitize_evidence(raw_text: str) -> str:
-    """Redacts sensitive credentials, tokens, and PII from evidence."""
-    # Redact Bearer Tokens / Authorization Headers
     sanitized = re.sub(r'(Authorization:\s*Bearer\s+)[A-Za-z0-9\-\._~\+\/]+=*', r'\1[REDACTED_TOKEN]', raw_text, flags=re.IGNORECASE)
-    
-    # Redact Passwords / API Keys in JSON/Query Params
     sanitized = re.sub(r'("(?:password|api_key|secret|token)"\s*:\s*")[^"]+(")', r'\1[REDACTED_CREDENTIAL]\2', sanitized, flags=re.IGNORECASE)
-    
-    # Redact Email Addresses
     sanitized = re.sub(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', '[REDACTED_EMAIL]', sanitized)
-    
-    # Redact IPv4 Addresses
     sanitized = re.sub(r'\b(?:10|172\.(?:1[6-9]|2[0-9]|3[01])|192\.168)\.\d{1,3}\.\d{1,3}\b', '[REDACTED_INTERNAL_IP]', sanitized)
-    
     return sanitized
 
 
 # ---------------------------------------------------------
-# 3. REMEDIATION & PATCH ADVISORY DATABASE
+# 4. CERT-In / NCIIPC ADVISORY GENERATOR
 # ---------------------------------------------------------
-REMEDIATION_DB = {
-    "CWE-693": {
-        "title": "Protection Mechanism Failure (Missing Security Headers)",
-        "remediation": "Configure HTTP Response Headers (HSTS, Content-Security-Policy, X-Frame-Options, X-Content-Type-Options) on the web application firewall or web server configuration.",
-        "nginx_snippet": "add_header X-Frame-Options \"DENY\";\nadd_header X-Content-Type-Options \"nosniff\";\nadd_header Strict-Transport-Security \"max-age=31536000; includeSubDomains\" always;",
-        "references": [
-            "https://owasp.org/www-project-secure-headers/",
-            "https://cwe.mitre.org/data/definitions/693.html"
-        ]
-    },
-    "CWE-200": {
-        "title": "Exposure of Sensitive Information to an Unauthorized Actor",
-        "remediation": "Disable server banner tokens, remove verbose error messages, and sanitize public response headers.",
-        "nginx_snippet": "server_tokens off;",
-        "references": [
-            "https://cwe.mitre.org/data/definitions/200.html",
-            "https://cheatsheetseries.owasp.org/cheatsheets/Information_Exposure_Prevention_Cheat_Sheet.html"
-        ]
-    }
-}
+def generate_certin_advisory(target: str, scan_result: dict) -> dict:
+    if scan_result.get("status") != "SUCCESS":
+        return {"error": "Scan failed, cannot generate advisory"}
 
+    missing = scan_result.get("missing_headers", [])
+    raw_headers = json.dumps(scan_result.get("raw_headers", {}), indent=2)
+    clean_evidence = sanitize_evidence(raw_headers)
 
-# ---------------------------------------------------------
-# 4. CERT-In / NCIIPC ADVISORY FORMATTER
-# ---------------------------------------------------------
-def generate_certin_advisory(target: str, cwe_id: str, cvss_score: float, raw_evidence: str) -> dict:
-    """Formats findings into official CERT-In / NCIIPC compliant JSON advisory."""
+    cwe_id = "CWE-693"
+    title = "Protection Mechanism Failure (Missing HTTP Security Headers)"
     
-    clean_evidence = sanitize_evidence(raw_evidence)
-    
-    remediation_info = REMEDIATION_DB.get(cwe_id, {
-        "title": "Security Configuration Issue",
-        "remediation": "Apply vendor security patches and follow OWASP hardening guidelines.",
-        "nginx_snippet": "N/A",
-        "references": ["https://cert-in.org.in/"]
-    })
-    
-    if cvss_score >= 9.0:
-        severity = "CRITICAL"
-    elif cvss_score >= 7.0:
-        severity = "HIGH"
-    elif cvss_score >= 4.0:
+    if len(missing) > 0:
+        cvss_score = 5.3
         severity = "MEDIUM"
+        findings_summary = f"The following security headers are missing: {', '.join(missing)}"
     else:
-        severity = "LOW"
+        cvss_score = 0.0
+        severity = "INFORMATIONAL"
+        findings_summary = "All basic HTTP security headers are present."
 
     advisory = {
         "advisory_meta": {
@@ -111,35 +126,37 @@ def generate_certin_advisory(target: str, cwe_id: str, cvss_score: float, raw_ev
         },
         "vulnerability_details": {
             "cwe_id": cwe_id,
-            "title": remediation_info["title"],
+            "title": title,
             "cvss_v31_score": cvss_score,
-            "severity": severity
+            "severity": severity,
+            "summary": findings_summary
         },
-        "sanitized_evidence": clean_evidence,
+        "sanitized_live_evidence": clean_evidence,
         "remediation_advisory": {
-            "recommended_action": remediation_info["remediation"],
-            "configuration_fix_example": remediation_info["nginx_snippet"],
-            "official_references": remediation_info["references"]
+            "recommended_action": "Configure HTTP response security headers on server/WAF.",
+            "nginx_snippet": "add_header X-Frame-Options \"DENY\";\nadd_header X-Content-Type-Options \"nosniff\";\nadd_header Strict-Transport-Security \"max-age=31536000; includeSubDomains\" always;",
+            "official_references": [
+                "https://owasp.org/www-project-secure-headers/",
+                "https://cwe.mitre.org/data/definitions/693.html"
+            ]
         }
     }
     
-    log_audit_event("ADVISORY_GENERATED", f"Advisory for {target} ({cwe_id}) generated successfully.")
+    log_audit_event("ADVISORY_GENERATED", f"Advisory for {target} generated.")
     return advisory
 
 
-def export_advisory_to_file(advisory_dict: dict, filename: str = "certin_advisory_output.json"):
-    """Saves structured advisory to a clean JSON file."""
+def export_advisory_to_file(advisory_dict: dict, filename: str):
     with open(filename, "w") as f:
         json.dump(advisory_dict, f, indent=4)
     log_audit_event("FILE_EXPORT", f"Advisory exported to {filename}")
-    print(f"[+] CERT-In Advisory saved to: {filename}")
+    print(f"[+] Live CERT-In Advisory saved to: {filename}")
 
 
 # ---------------------------------------------------------
-# LOCAL MODULE TEST RUNNER (PUBLIC GOV DOMAINS SCOPE)
+# EXECUTION RUNNER
 # ---------------------------------------------------------
 if __name__ == "__main__":
-    # Allowed Scope list with official Public Government Domains
     ALLOWED_SCOPE = [
         "digitalindia.gov.in",
         "mygov.in",
@@ -147,23 +164,14 @@ if __name__ == "__main__":
         "mca.gov.in"
     ]
     
-    # Target domain selected for passive analysis advisory generation
     target_domain = "digitalindia.gov.in"
     
     if validate_scope(target_domain, ALLOWED_SCOPE):
-        # Sample non-destructive HTTP metadata response
-        sample_raw_evidence = f"""
-        HTTP/1.1 200 OK
-        Server: NGINX Public Gateway
-        Target: {target_domain}
-        Notice: Passive OSINT metadata collection for security compliance check.
-        """
+        # Perform real passive header fetch
+        scan_result = analyze_live_passive_headers(target_domain)
         
-        advisory = generate_certin_advisory(
-            target=target_domain,
-            cwe_id="CWE-693",
-            cvss_score=5.3,
-            raw_evidence=sample_raw_evidence
-        )
-        
-        export_advisory_to_file(advisory, filename=f"certin_advisory_{target_domain}.json")
+        if scan_result.get("status") == "SUCCESS":
+            advisory = generate_certin_advisory(target_domain, scan_result)
+            export_advisory_to_file(advisory, filename=f"certin_advisory_{target_domain}.json")
+        else:
+            print(f"[-] Scan could not be completed: {scan_result.get('reason')}")
