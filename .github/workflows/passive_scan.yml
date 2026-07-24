@@ -1,0 +1,30 @@
+name: SUDARSHAN Passive Recon OSINT Schedule
+
+on:
+  schedule:
+    # Runs every Sunday at 00:00 UTC
+    - cron: '0 0 * * 0'
+  workflow_dispatch: # Allows manual trigger anytime from GitHub UI
+
+jobs:
+  passive-recon-job:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository Code
+      uses: actions/checkout@v3
+
+    - name: Set Up Python Environment
+      uses: actions/python-versions@v4
+      with:
+        python-version: '3.11'
+
+    - name: Run SUDARSHAN Passive OSINT Scan
+      run: |
+        python modules/passive_osint_engine.py
+
+    - name: Upload Passive Recon Output Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: passive-recon-results
+        path: passive_recon_results.json
