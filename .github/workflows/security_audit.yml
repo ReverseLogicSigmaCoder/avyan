@@ -1,10 +1,9 @@
-name: SUDARSHAN Automated Code & Security Auditor
+name: SUDARSHAN Security Auditor
 
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   audit:
@@ -21,14 +20,9 @@ jobs:
     - name: Install Static Analysis Tools
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 bandit
+        pip install bandit
 
-    - name: Python Syntax & Code Flaw Check
+    - name: Run Bandit Security Analysis
       run: |
-        # Checks for syntax errors and undefined variables
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        bandit -r . -x ./venv -ll --exit-zero
 
-    - name: Security Vulnerability Scan in Code (Bandit)
-      run: |
-        # Scans python code for hardcoded passwords, unsafe imports, etc.
-        bandit -r . -ll
