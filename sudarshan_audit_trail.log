@@ -1,0 +1,7 @@
+2026-07-24 19:05:42,699 UTC - [AUDIT] - [SCOPE_VALIDATION] Target 'digitalindia.gov.in' is AUTHORIZED.
+2026-07-24 19:05:42,701 UTC - [AUDIT] - [ADVISORY_GENERATED] Advisory for digitalindia.gov.in (CWE-693) generated successfully.
+2026-07-24 19:05:42,702 UTC - [AUDIT] - [FILE_EXPORT] Advisory exported to certin_advisory_digitalindia.gov.in.json
+2026-07-24 19:49:04,876 UTC - [AUDIT] - [SCOPE_VALIDATION] Target 'digitalindia.gov.in' is AUTHORIZED.
+2026-07-24 19:49:04,876 UTC - [AUDIT] - [PASSIVE_SCAN_START] Fetching public headers for https://digitalindia.gov.in
+2026-07-24 19:49:05,872 UTC - [AUDIT] - [ADVISORY_GENERATED] Advisory for digitalindia.gov.in generated.
+2026-07-24 19:49:05,877 UTC - [AUDIT] - [FILE_EXPORT] Advisory exported to certin_advisory_digitalindia.gov.in.json

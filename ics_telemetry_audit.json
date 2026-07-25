@@ -1,0 +1,7 @@
+{
+    "protocol_monitored": "Modbus TCP / DNP3",
+    "air_gap_status": "SECURE (Data Diode Enforced)",
+    "unauthorized_external_packets": 0,
+    "firmware_integrity_status": "VERIFIED_IMMUTABLE",
+    "timestamp": "2026-07-25T01:26:58.277045+00:00"
+}

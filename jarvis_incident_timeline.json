@@ -38,5 +38,29 @@
             "targets_scanned": 4,
             "risk_score": 100
         }
+    },
+    {
+        "timestamp": "2026-07-24 11:13:00 IST",
+        "event_type": "JARVIS_FULL_AUDIT",
+        "details": {
+            "targets_scanned": 4,
+            "risk_score": 100
+        }
+    },
+    {
+        "timestamp": "2026-07-24 11:13:06 IST",
+        "event_type": "JARVIS_FULL_AUDIT",
+        "details": {
+            "targets_scanned": 4,
+            "risk_score": 100
+        }
+    },
+    {
+        "timestamp": "2026-07-24 11:13:50 IST",
+        "event_type": "JARVIS_FULL_AUDIT",
+        "details": {
+            "targets_scanned": 4,
+            "risk_score": 100
+        }
     }
 ]
