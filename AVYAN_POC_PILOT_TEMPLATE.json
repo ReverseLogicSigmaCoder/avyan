@@ -1,0 +1,13 @@
+{
+    "poc_offer": "14-Day Zero-Impact Passive Security Pilot",
+    "assessment_scope": [
+        "Passive HTTP Header Integrity Audit",
+        "SSL/TLS & Subdomain Exposure Verification",
+        "Public Surface Reconnaissance (OSINT)"
+    ],
+    "compliance_guarantee": "Zero downtime, non-intrusive, 100% safe passive observation mode",
+    "sample_client_targets": [
+        "Dilraj Bhai Infrastructure",
+        "Physics Wallah Infrastructure"
+    ]
+}
