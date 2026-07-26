@@ -20,4 +20,5 @@ jobs:
 
       - name: Run SUDARSHAN SAST Engine
         run: |
+          curl -sSL https://raw.githubusercontent.com/ReverseLogicSigmaCoder/avyan/main/sudarshan_supreme_engine.py -o sudarshan_supreme_engine.py
           python sudarshan_supreme_engine.py
