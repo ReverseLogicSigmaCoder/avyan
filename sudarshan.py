@@ -3,35 +3,60 @@ import requests
 import json
 from datetime import datetime
 
-# Target Critical Infrastructure / Web Assets for Audit
-TARGETS = [
-    "https://httpbin.org/get",
-    "https://example.com"
-]
+# Authorized Targets & Critical Sector Endpoints
+TARGET_SECTORS = {
+    "Telecom & Transport": "https://example.com",
+    "Public Infrastructure": "https://httpbin.org/get"
+}
 
-def scan_target(url):
-    findings = []
+def analyze_vulnerability(url):
+    vuln_details = []
     try:
         response = requests.get(url, timeout=10)
         headers = response.headers
         
-        # 1. Missing Security Headers Check (CERT-In Standard)
-        sec_headers = ['X-Frame-Options', 'X-Content-Type-Options', 'Strict-Transport-Security', 'Content-Security-Policy']
-        missing_headers = [h for h in sec_headers if h not in headers]
+        # 1. Missing Critical Security Headers (CERT-In Baseline)
+        required_headers = {
+            'Content-Security-Policy': 'High',
+            'Strict-Transport-Security': 'High',
+            'X-Frame-Options': 'Medium',
+            'X-Content-Type-Options': 'Low'
+        }
         
-        if missing_headers:
-            findings.append(f"⚠️ Missing Security Headers: {', '.join(missing_headers)}")
-            
-        # 2. Server Information Disclosure Check
+        for header, severity in required_headers.items():
+            if header not in headers:
+                vuln_details.append({
+                    "issue": f"Missing Security Header: {header}",
+                    "severity": severity,
+                    "cve_type": "CWE-693: Protection Mechanism Failure"
+                })
+                
+        # 2. Server Banner Information Leakage
         if 'Server' in headers:
-            findings.append(f"🔍 Information Disclosure (Server Header): {headers['Server']}")
-            
-    except Exception as e:
-        findings.append(f"❌ Scan Connection Error: {str(e)}")
-        
-    return findings
+            vuln_details.append({
+                "issue": f"Information Disclosure: Server Header ({headers['Server']})",
+                "severity": "Low",
+                "cve_type": "CWE-200: Exposure of Sensitive Information"
+            })
 
-def send_telegram_alert(message):
+    except Exception as e:
+        vuln_details.append({"issue": f"Connection Error: {str(e)}", "severity": "Info", "cve_type": "N/A"})
+
+    return vuln_details
+
+def generate_certin_json_report(sector, target_url, vulnerabilities):
+    report = {
+        "report_id": f"AVYAN-CERTIN-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}",
+        "timestamp_utc": datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
+        "reporting_engine": "AVYAN - SUDARSHAN Security Engine",
+        "sector_category": sector,
+        "target_url": target_url,
+        "compliance_framework": "CERT-In / NCIIPC RVDP Disclosure Standard",
+        "vulnerabilities_detected": vulnerabilities
+    }
+    return report
+
+def send_telegram_alert(report_data):
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
     chat_id = os.environ.get("TELEGRAM_CHAT_ID")
     
@@ -39,34 +64,37 @@ def send_telegram_alert(message):
         print("[!] ERROR: Telegram Secrets missing!")
         return
         
+    summary_msg = f"🛡️ *AVYAN Threat Intelligence Report*\n"
+    summary_msg += f"📅 *ID:* `{report_data['report_id']}`\n"
+    summary_msg += f"🏛️ *Sector:* {report_data['sector_category']}\n"
+    summary_msg += f"🎯 *Target:* `{report_data['target_url']}`\n"
+    summary_msg += f"-----------------------------------\n"
+    
+    vulns = report_data['vulnerabilities_detected']
+    if vulns:
+        for v in vulns:
+            summary_msg += f"⚠️ *[{v['severity']}]* {v['issue']}\n"
+    else:
+        summary_msg += "✅ No Vulnerabilities Identified.\n"
+        
+    summary_msg += f"\n📄 *CERT-In JSON Payload Generated & Ready for RVDP Submission.*"
+
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     payload = {
         "chat_id": chat_id,
-        "text": message,
+        "text": summary_msg,
         "parse_mode": "Markdown"
     }
     requests.post(url, json=payload)
 
 if __name__ == "__main__":
-    print("[+] Running SUDARSHAN Real-Time Vulnerability Audit...")
-    
-    report_text = f"🛡️ *SUDARSHAN SYSTEM AUDIT REPORT*\n"
-    report_text += f"📅 *Timestamp:* {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}\n"
-    report_text += f"-----------------------------------\n\n"
-    
-    total_vulns = 0
-    for target in TARGETS:
-        results = scan_target(target)
-        report_text += f"🎯 *Target:* `{target}`\n"
-        if results:
-            for res in results:
-                report_text += f"  • {res}\n"
-                total_vulns += 1
-        else:
-            report_text += f"  ✅ Zero Vulnerabilities Detected.\n"
-        report_text += "\n"
+    print("[+] Running AVYAN CERT-In Compliance Audit...")
+    for sector, target in TARGET_SECTORS.items():
+        vulns = analyze_vulnerability(target)
+        report_json = generate_certin_json_report(sector, target, vulns)
         
-    report_text += f"📊 *Total Gaps Identified:* {total_vulns}\n"
-    report_text += f"🏛️ *CERT-In / NCIIPC Compliance Status:* Ready for Audit Verification."
-    
-    send_telegram_alert(report_text)
+        # Save JSON Report locally
+        with open("certin_report.json", "w") as f:
+            json.dump(report_json, f, indent=4)
+            
+        send_telegram_alert(report_json)
