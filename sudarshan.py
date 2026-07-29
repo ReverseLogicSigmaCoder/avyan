@@ -4,18 +4,15 @@ import json
 import pkg_resources
 from datetime import datetime
 
-# NCIIPC 6 Critical Infrastructure Sectors Mapping
-CRITICAL_SECTORS = [
-    "BFSI (Banking & Financial Services)",
-    "Power & Energy",
-    "Telecom",
-    "Transport",
-    "Strategic & Government Enterprises",
-    "Core Government"
-]
+def load_targets():
+    """Loads target URLs from targets.txt file"""
+    targets = []
+    if os.path.exists("targets.txt"):
+        with open("targets.txt", "r") as f:
+            targets = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+    return targets if targets else ["https://httpbin.org/get"]
 
 def generate_sbom():
-    """Generates an Automated Software Bill of Materials (SBOM) for IDDM Indigenous Certification"""
     installed_packages = [
         {"package": dist.key, "version": dist.version, "indigenous_audit": "PASSED"}
         for dist in pkg_resources.working_set
@@ -31,31 +28,28 @@ def generate_sbom():
     }
     return sbom_manifest
 
-def analyze_vulnerability(url):
-    vuln_details = []
+def scan_vdp_target(url):
+    findings = []
     try:
         response = requests.get(url, timeout=10)
         headers = response.headers
         
-        required_headers = {
-            'Content-Security-Policy': 'High',
-            'Strict-Transport-Security': 'High',
-            'X-Frame-Options': 'Medium'
-        }
-        
-        for header, severity in required_headers.items():
-            if header not in headers:
-                vuln_details.append({
-                    "issue": f"Missing Security Header: {header}",
-                    "severity": severity,
-                    "cve_type": "CWE-693: Protection Mechanism Failure"
-                })
+        # 1. Missing Security Headers Audit
+        required_headers = ['Content-Security-Policy', 'Strict-Transport-Security', 'X-Frame-Options', 'X-Content-Type-Options']
+        missing = [h for h in required_headers if h not in headers]
+        if missing:
+            findings.append(f"⚠️ Missing Security Headers: {', '.join(missing)}")
+            
+        # 2. Server Banner Leakage
+        if 'Server' in headers:
+            findings.append(f"🔍 Exposed Server Banner: {headers['Server']}")
+            
     except Exception as e:
-        vuln_details.append({"issue": f"Connection Error: {str(e)}", "severity": "Info", "cve_type": "N/A"})
+        findings.append(f"❌ Scan Connection Error: {str(e)}")
+        
+    return findings
 
-    return vuln_details
-
-def send_telegram_alert(sbom_data, vuln_count):
+def send_telegram_alert(target_results, total_targets):
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
     chat_id = os.environ.get("TELEGRAM_CHAT_ID")
     
@@ -63,34 +57,44 @@ def send_telegram_alert(sbom_data, vuln_count):
         print("[!] ERROR: Telegram Secrets missing!")
         return
         
-    summary_msg = f"🛡️ *AVYAN Project - Sovereign Security & Compliance Audit*\n"
-    summary_msg += f"📅 *Timestamp:* `{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}`\n"
-    summary_msg += f"-----------------------------------\n\n"
-    summary_msg += f"📦 *Automated SBOM Generated:* `{len(sbom_data['components'])} Packages Audited`\n"
-    summary_msg += f"🇮🇳 *Indigenous IDDM Status:* `{sbom_data['indigenous_content']}`\n"
-    summary_msg += f"🏛️ *NCIIPC Sectors Mapped:* `{len(CRITICAL_SECTORS)} / 6 Sectors Active`\n\n"
-    summary_msg += f"🔍 *Continuous Scan Gaps Identified:* `{vuln_count}`\n"
-    summary_msg += f"📄 *SBOM & CERT-In Compliance Logs Saved Successfully.*"
+    msg = f"🛡️ *SUDARSHAN - Dual-Defense Threat Engine*\n"
+    msg += f"📅 *Time:* `{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}`\n"
+    msg += f"🎯 *Active Targets Scanned:* `{total_targets}`\n"
+    msg += f"-----------------------------------\n\n"
+    
+    for res in target_results:
+        msg += f"🌐 *Target:* `{res['target']}`\n"
+        if res['issues']:
+            for issue in res['issues']:
+                msg += f"  • {issue}\n"
+        else:
+            msg += "  ✅ No Gaps Identified.\n"
+        msg += "\n"
+        
+    msg += f"🇮🇳 *Sovereign IDDM & Bugcrowd VDP Mode Active.*"
 
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     payload = {
         "chat_id": chat_id,
-        "text": summary_msg,
+        "text": msg,
         "parse_mode": "Markdown"
     }
     requests.post(url, json=payload)
 
 if __name__ == "__main__":
-    print("[+] Running AVYAN SBOM & NCIIPC Compliance Engine...")
+    print("[+] Running SUDARSHAN VDP & Sovereign Defense Audit...")
     
-    # 1. Generate Local SBOM Manifest File
-    sbom_manifest = generate_sbom()
+    # 1. Generate SBOM
+    sbom = generate_sbom()
     with open("sbom_manifest.json", "w") as f:
-        json.dump(sbom_manifest, f, indent=4)
+        json.dump(sbom, f, indent=4)
         
-    # 2. Perform Audit Scan
-    target = "https://httpbin.org/get"
-    vulns = analyze_vulnerability(target)
-    
-    # 3. Send Unified Telegram Alert
-    send_telegram_alert(sbom_manifest, len(vulns))
+    # 2. Scan Targets
+    targets = load_targets()
+    results = []
+    for t in targets:
+        issues = scan_vdp_target(t)
+        results.append({"target": t, "issues": issues})
+        
+    # 3. Send Alert
+    send_telegram_alert(results, len(targets))
