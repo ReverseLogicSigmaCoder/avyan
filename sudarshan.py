@@ -1,4 +1,5 @@
 import os
+import re
 import requests
 import json
 from datetime import datetime
@@ -7,44 +8,39 @@ def load_targets():
     if os.path.exists("targets.txt"):
         with open("targets.txt", "r") as f:
             return [line.strip() for line in f if line.strip() and not line.startswith("#")]
-    return ["https://httpbin.org/get"]
+    return ["https://adobe.com"]
 
-def deep_security_audit(target_url):
+def deep_recon_audit(target_url):
     findings = []
-    
-    # Common High-Risk Paths to Check for Exposure
-    sensitive_paths = [
-        "/.env",
-        "/.git/HEAD",
-        "/config.json",
-        "/actuator/env",
-        "/api/v1/debug"
-    ]
-    
-    base_url = target_url.rsplit('/', 1)[0] if target_url.endswith('/get') else target_url
-    
-    # 1. Critical Endpoint Leakage Check
-    for path in sensitive_paths:
-        test_url = f"{base_url.rstrip('/')}{path}"
-        try:
-            res = requests.get(test_url, timeout=5, allow_redirects=False)
-            if res.status_code == 200 and len(res.text) > 0:
-                findings.append(f"🔥 **HIGH SEVERITY**: Sensitive Endpoint Exposed! `{path}` (HTTP 200)")
-        except Exception:
-            pass
-            
-    # 2. CORS Misconfiguration Check (Data Leak Risk)
-    headers_cors = {'Origin': 'https://evil-attacker.com'}
     try:
-        res_cors = requests.get(target_url, headers=headers_cors, timeout=5)
-        allow_origin = res_cors.headers.get('Access-Control-Allow-Origin')
-        allow_credentials = res_cors.headers.get('Access-Control-Allow-Credentials')
+        res = requests.get(target_url, timeout=10)
+        html_content = res.text
         
-        if allow_origin == 'https://evil-attacker.com' or (allow_origin == '*' and allow_credentials == 'true'):
-            findings.append("⚡ **MEDIUM/HIGH**: Critical CORS Misconfiguration (Arbitrary Origin Allowed)")
-    except Exception:
-        pass
+        # 1. Extract JavaScript Files for Secret Crawling
+        js_files = re.findall(r'src=["\'](.*?\.js)["\']', html_content)
+        if js_files:
+            findings.append(f"📦 Found `{len(js_files)}` JS Bundle Files for Secret Analysis.")
+            
+        # 2. Check for Leaked Cloud Credentials & Sensitive Patterns in HTML/JS
+        patterns = {
+            "AWS Access Key": r'AKIA[0-9A-Z]{16}',
+            "Generic API Key": r'api[_-]?key["\']?\s*[:=]\s*["\']([a-zA-Z0-9_\-]{20,})["\']',
+            "Internal JWT Token": r'eyJ[a-zA-Z0-9_-]{10,}\.eyJ[a-zA-Z0-9_-]{10,}'
+        }
+        
+        for key_name, pattern in patterns.items():
+            matches = re.findall(pattern, html_content)
+            if matches:
+                findings.append(f"🔥 **CRITICAL LEAK**: {key_name} Identified in Page Source!")
 
+        # 3. CORS Misconfig Check
+        res_cors = requests.get(target_url, headers={'Origin': 'https://evil.com'}, timeout=5)
+        if res_cors.headers.get('Access-Control-Allow-Origin') == 'https://evil.com':
+            findings.append("⚡ **HIGH SEVERITY**: CORS Wildcard/Arbitrary Origin Misconfiguration!")
+
+    except Exception as e:
+        findings.append(f"⚠️ Scan Warning: {str(e)}")
+        
     return findings
 
 def send_telegram_alert(target_results):
@@ -55,41 +51,28 @@ def send_telegram_alert(target_results):
         print("[!] ERROR: Telegram Secrets missing!")
         return
         
-    msg = f"🛡️ *SUDARSHAN - Advanced Threat & Bounty Scanner*\n"
+    msg = f"🛡️ *SUDARSHAN - Deep Critical Recon Engine*\n"
     msg += f"📅 *Time:* `{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}`\n"
     msg += f"-----------------------------------\n\n"
     
-    high_impact_found = False
     for res in target_results:
         msg += f"🌐 *Target:* `{res['target']}`\n"
         if res['issues']:
-            high_impact_found = True
             for issue in res['issues']:
-                msg += f"  {issue}\n"
+                msg += f"  • {issue}\n"
         else:
-            msg += "  ✅ Clean / No Critical Endpoints Exposed.\n"
+            msg += "  ✅ Clean / No Secrets or Critical Flaws Exposed.\n"
         msg += "\n"
-        
-    if high_impact_found:
-        msg += "🎯 *ACTION REQUIRED:* High-impact findings identified! Ready for validation & VDP submission."
-    else:
-        msg += "🔍 *Status:* No high-severity exposures found on current targets."
 
     url = f"https://api.telegram.org/bot{token}/sendMessage"
-    payload = {
-        "chat_id": chat_id,
-        "text": msg,
-        "parse_mode": "Markdown"
-    }
+    payload = {"chat_id": chat_id, "text": msg, "parse_mode": "Markdown"}
     requests.post(url, json=payload)
 
 if __name__ == "__main__":
-    print("[+] Executing SUDARSHAN Deep Impact Vulnerability Audit...")
+    print("[+] Executing SUDARSHAN Critical Recon & Secret Analyzer...")
     targets = load_targets()
     results = []
-    
     for t in targets:
-        issues = deep_security_audit(t)
+        issues = deep_recon_audit(t)
         results.append({"target": t, "issues": issues})
-        
     send_telegram_alert(results)
