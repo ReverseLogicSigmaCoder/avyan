@@ -1,2 +1,5 @@
-https://httpbin.org/get
-https://example.com
+https://adobe.com
+https://adobelogin.com
+https://adobe.io
+https://att.com
+https://att.net
