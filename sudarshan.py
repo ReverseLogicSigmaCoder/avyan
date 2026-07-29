@@ -8,38 +8,26 @@ def load_targets():
     if os.path.exists("targets.txt"):
         with open("targets.txt", "r") as f:
             return [line.strip() for line in f if line.strip() and not line.startswith("#")]
-    return ["https://adobe.com"]
+    return ["https://creativecloud.adobe.com"]
 
 def deep_recon_audit(target_url):
     findings = []
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
     try:
-        res = requests.get(target_url, timeout=10)
+        res = requests.get(target_url, headers=headers, timeout=10, allow_redirects=True)
         html_content = res.text
         
-        # 1. Extract JavaScript Files for Secret Crawling
+        # 1. JS Bundle Detection
         js_files = re.findall(r'src=["\'](.*?\.js)["\']', html_content)
         if js_files:
-            findings.append(f"📦 Found `{len(js_files)}` JS Bundle Files for Secret Analysis.")
+            findings.append(f"📦 Identified `{len(js_files)}` JS Bundles for analysis.")
             
-        # 2. Check for Leaked Cloud Credentials & Sensitive Patterns in HTML/JS
-        patterns = {
-            "AWS Access Key": r'AKIA[0-9A-Z]{16}',
-            "Generic API Key": r'api[_-]?key["\']?\s*[:=]\s*["\']([a-zA-Z0-9_\-]{20,})["\']',
-            "Internal JWT Token": r'eyJ[a-zA-Z0-9_-]{10,}\.eyJ[a-zA-Z0-9_-]{10,}'
-        }
-        
-        for key_name, pattern in patterns.items():
-            matches = re.findall(pattern, html_content)
-            if matches:
-                findings.append(f"🔥 **CRITICAL LEAK**: {key_name} Identified in Page Source!")
-
-        # 3. CORS Misconfig Check
-        res_cors = requests.get(target_url, headers={'Origin': 'https://evil.com'}, timeout=5)
-        if res_cors.headers.get('Access-Control-Allow-Origin') == 'https://evil.com':
-            findings.append("⚡ **HIGH SEVERITY**: CORS Wildcard/Arbitrary Origin Misconfiguration!")
+        # 2. Key Leaks Check
+        if "AKIA" in html_content:
+            findings.append("🔥 **CRITICAL**: AWS Access Key Pattern Detected!")
 
     except Exception as e:
-        findings.append(f"⚠️ Scan Warning: {str(e)}")
+        findings.append(f"⚠️ Target Unreachable: {str(e)[:30]}")
         
     return findings
 
@@ -51,7 +39,7 @@ def send_telegram_alert(target_results):
         print("[!] ERROR: Telegram Secrets missing!")
         return
         
-    msg = f"🛡️ *SUDARSHAN - Deep Critical Recon Engine*\n"
+    msg = f"🛡️ *SUDARSHAN - Deep Subdomain Recon Engine*\n"
     msg += f"📅 *Time:* `{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}`\n"
     msg += f"-----------------------------------\n\n"
     
@@ -61,7 +49,7 @@ def send_telegram_alert(target_results):
             for issue in res['issues']:
                 msg += f"  • {issue}\n"
         else:
-            msg += "  ✅ Clean / No Secrets or Critical Flaws Exposed.\n"
+            msg += "  ✅ Clean / No Exposed Leaks Identified.\n"
         msg += "\n"
 
     url = f"https://api.telegram.org/bot{token}/sendMessage"
@@ -69,7 +57,7 @@ def send_telegram_alert(target_results):
     requests.post(url, json=payload)
 
 if __name__ == "__main__":
-    print("[+] Executing SUDARSHAN Critical Recon & Secret Analyzer...")
+    print("[+] Running SUDARSHAN Subdomain Recon...")
     targets = load_targets()
     results = []
     for t in targets:

@@ -1,5 +1,5 @@
-https://adobe.com
-https://adobelogin.com
-https://adobe.io
-https://att.com
-https://att.net
+https://creativecloud.adobe.com
+https://stock.adobe.com
+https://documentcloud.adobe.com
+https://biz.att.com
+https://signin.att.com
