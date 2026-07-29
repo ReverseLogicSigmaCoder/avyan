@@ -1,55 +1,53 @@
 import os
 import requests
 import json
-import pkg_resources
 from datetime import datetime
 
 def load_targets():
-    """Loads target URLs from targets.txt file"""
-    targets = []
     if os.path.exists("targets.txt"):
         with open("targets.txt", "r") as f:
-            targets = [line.strip() for line in f if line.strip() and not line.startswith("#")]
-    return targets if targets else ["https://httpbin.org/get"]
+            return [line.strip() for line in f if line.strip() and not line.startswith("#")]
+    return ["https://httpbin.org/get"]
 
-def generate_sbom():
-    installed_packages = [
-        {"package": dist.key, "version": dist.version, "indigenous_audit": "PASSED"}
-        for dist in pkg_resources.working_set
+def deep_security_audit(target_url):
+    findings = []
+    
+    # Common High-Risk Paths to Check for Exposure
+    sensitive_paths = [
+        "/.env",
+        "/.git/HEAD",
+        "/config.json",
+        "/actuator/env",
+        "/api/v1/debug"
     ]
     
-    sbom_manifest = {
-        "bomFormat": "CycloneDX / SPDX Standard",
-        "specVersion": "1.4",
-        "timestamp": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-        "project_name": "AVYAN - Sovereign Infrastructure Protection",
-        "indigenous_content": "60%+ Verified (Make In India IDDM Standard)",
-        "components": installed_packages
-    }
-    return sbom_manifest
-
-def scan_vdp_target(url):
-    findings = []
+    base_url = target_url.rsplit('/', 1)[0] if target_url.endswith('/get') else target_url
+    
+    # 1. Critical Endpoint Leakage Check
+    for path in sensitive_paths:
+        test_url = f"{base_url.rstrip('/')}{path}"
+        try:
+            res = requests.get(test_url, timeout=5, allow_redirects=False)
+            if res.status_code == 200 and len(res.text) > 0:
+                findings.append(f"🔥 **HIGH SEVERITY**: Sensitive Endpoint Exposed! `{path}` (HTTP 200)")
+        except Exception:
+            pass
+            
+    # 2. CORS Misconfiguration Check (Data Leak Risk)
+    headers_cors = {'Origin': 'https://evil-attacker.com'}
     try:
-        response = requests.get(url, timeout=10)
-        headers = response.headers
+        res_cors = requests.get(target_url, headers=headers_cors, timeout=5)
+        allow_origin = res_cors.headers.get('Access-Control-Allow-Origin')
+        allow_credentials = res_cors.headers.get('Access-Control-Allow-Credentials')
         
-        # 1. Missing Security Headers Audit
-        required_headers = ['Content-Security-Policy', 'Strict-Transport-Security', 'X-Frame-Options', 'X-Content-Type-Options']
-        missing = [h for h in required_headers if h not in headers]
-        if missing:
-            findings.append(f"⚠️ Missing Security Headers: {', '.join(missing)}")
-            
-        # 2. Server Banner Leakage
-        if 'Server' in headers:
-            findings.append(f"🔍 Exposed Server Banner: {headers['Server']}")
-            
-    except Exception as e:
-        findings.append(f"❌ Scan Connection Error: {str(e)}")
-        
+        if allow_origin == 'https://evil-attacker.com' or (allow_origin == '*' and allow_credentials == 'true'):
+            findings.append("⚡ **MEDIUM/HIGH**: Critical CORS Misconfiguration (Arbitrary Origin Allowed)")
+    except Exception:
+        pass
+
     return findings
 
-def send_telegram_alert(target_results, total_targets):
+def send_telegram_alert(target_results):
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
     chat_id = os.environ.get("TELEGRAM_CHAT_ID")
     
@@ -57,21 +55,25 @@ def send_telegram_alert(target_results, total_targets):
         print("[!] ERROR: Telegram Secrets missing!")
         return
         
-    msg = f"🛡️ *SUDARSHAN - Dual-Defense Threat Engine*\n"
+    msg = f"🛡️ *SUDARSHAN - Advanced Threat & Bounty Scanner*\n"
     msg += f"📅 *Time:* `{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}`\n"
-    msg += f"🎯 *Active Targets Scanned:* `{total_targets}`\n"
     msg += f"-----------------------------------\n\n"
     
+    high_impact_found = False
     for res in target_results:
         msg += f"🌐 *Target:* `{res['target']}`\n"
         if res['issues']:
+            high_impact_found = True
             for issue in res['issues']:
-                msg += f"  • {issue}\n"
+                msg += f"  {issue}\n"
         else:
-            msg += "  ✅ No Gaps Identified.\n"
+            msg += "  ✅ Clean / No Critical Endpoints Exposed.\n"
         msg += "\n"
         
-    msg += f"🇮🇳 *Sovereign IDDM & Bugcrowd VDP Mode Active.*"
+    if high_impact_found:
+        msg += "🎯 *ACTION REQUIRED:* High-impact findings identified! Ready for validation & VDP submission."
+    else:
+        msg += "🔍 *Status:* No high-severity exposures found on current targets."
 
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     payload = {
@@ -82,19 +84,12 @@ def send_telegram_alert(target_results, total_targets):
     requests.post(url, json=payload)
 
 if __name__ == "__main__":
-    print("[+] Running SUDARSHAN VDP & Sovereign Defense Audit...")
-    
-    # 1. Generate SBOM
-    sbom = generate_sbom()
-    with open("sbom_manifest.json", "w") as f:
-        json.dump(sbom, f, indent=4)
-        
-    # 2. Scan Targets
+    print("[+] Executing SUDARSHAN Deep Impact Vulnerability Audit...")
     targets = load_targets()
     results = []
+    
     for t in targets:
-        issues = scan_vdp_target(t)
+        issues = deep_security_audit(t)
         results.append({"target": t, "issues": issues})
         
-    # 3. Send Alert
-    send_telegram_alert(results, len(targets))
+    send_telegram_alert(results)
