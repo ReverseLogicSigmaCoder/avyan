@@ -1,0 +1,18 @@
+{
+    "sbom_version": "1.0",
+    "timestamp": "2026-07-23 22:10:49 IST",
+    "components": [
+        {
+            "name": "requests",
+            "version_spec": "requests>=2.28.0",
+            "component_hash": "7ac5f4a34274",
+            "status": "VERIFIED_CLEAN"
+        },
+        {
+            "name": "urllib3",
+            "version_spec": "urllib3>=1.26.0",
+            "component_hash": "b1b3ce26f8c2",
+            "status": "VERIFIED_CLEAN"
+        }
+    ]
+}

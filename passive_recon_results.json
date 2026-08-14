@@ -1,0 +1,23 @@
+{
+    "engine": "SUDARSHAN Passive OSINT Engine",
+    "timestamp_utc": "2026-07-24T18:27:43.200213+00:00",
+    "targets_scanned": 4,
+    "recon_data": {
+        "digitalindia.gov.in": {
+            "total_subdomains": 0,
+            "subdomains_sample": []
+        },
+        "mygov.in": {
+            "total_subdomains": 0,
+            "subdomains_sample": []
+        },
+        "mca.gov.in": {
+            "total_subdomains": 0,
+            "subdomains_sample": []
+        },
+        "ncs.gov.in": {
+            "total_subdomains": 0,
+            "subdomains_sample": []
+        }
+    }
+}

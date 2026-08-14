@@ -1,0 +1,20 @@
+{
+  "client_info": {
+    "client_name": "Enterprise Client / Anchor Techno Soft",
+    "deployment_mode": "STAGING"
+  },
+  "network_config": {
+    "target_ip_range": "192.168.1.0/24",
+    "monitored_ports": [80, 443, 8080, 502],
+    "airgap_isolated_mode": true
+  },
+  "scada_protocols": {
+    "modbus_tcp_enabled": true,
+    "dnp3_enabled": true,
+    "iec_104_enabled": true
+  },
+  "reporting": {
+    "auto_generate_certin_pdf": true,
+    "scan_interval_seconds": 300
+  }
+}

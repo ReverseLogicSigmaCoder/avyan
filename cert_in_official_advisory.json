@@ -1,0 +1,65 @@
+{
+    "advisory_metadata": {
+        "issuing_agency": "PROJECT AVYAN - SUDARSHAN Security Engine",
+        "compliance_standard": "CERT-In / NCIIPC Vulnerability Disclosure Format",
+        "timestamp_utc": "2026-07-24T19:45:11.517081+00:00",
+        "target_inspected": "https://github.com/fastapi/fastapi"
+    },
+    "executive_summary": {
+        "total_files_analyzed": 526,
+        "actionable_findings_count": 5,
+        "risk_status": "HIGH"
+    },
+    "vulnerability_details": [
+        {
+            "component_path": "docs_src/dependencies/tutorial013_an_py310.py",
+            "vulnerability_type": "Potential Insecure Direct Object Reference (IDOR) / Missing Access Control",
+            "cwe_identifier": "CWE-639",
+            "severity_level": "HIGH",
+            "cvss_score": 7.5,
+            "affected_function_or_line": "Function: get_user at Line 24",
+            "technical_description": "Function 'get_user' accepts sensitive parameter ['user_id', 'session'] but lacks authorization decorators or explicit verification calls.",
+            "recommended_remediation": "Apply strict authorization checks, decorators, and access control validation before handling object references."
+        },
+        {
+            "component_path": "docs_src/dependencies/tutorial014_an_py310.py",
+            "vulnerability_type": "Potential Insecure Direct Object Reference (IDOR) / Missing Access Control",
+            "cwe_identifier": "CWE-639",
+            "severity_level": "HIGH",
+            "cvss_score": 7.5,
+            "affected_function_or_line": "Function: get_user at Line 24",
+            "technical_description": "Function 'get_user' accepts sensitive parameter ['user_id', 'session'] but lacks authorization decorators or explicit verification calls.",
+            "recommended_remediation": "Apply strict authorization checks, decorators, and access control validation before handling object references."
+        },
+        {
+            "component_path": "docs_src/encoder/tutorial001_py310.py",
+            "vulnerability_type": "Potential Insecure Direct Object Reference (IDOR) / Missing Access Control",
+            "cwe_identifier": "CWE-639",
+            "severity_level": "HIGH",
+            "cvss_score": 7.5,
+            "affected_function_or_line": "Function: update_item at Line 20",
+            "technical_description": "Function 'update_item' accepts sensitive parameter ['id', 'item'] but lacks authorization decorators or explicit verification calls.",
+            "recommended_remediation": "Apply strict authorization checks, decorators, and access control validation before handling object references."
+        },
+        {
+            "component_path": "docs_src/query_params_str_validations/tutorial015_an_py310.py",
+            "vulnerability_type": "Potential Insecure Direct Object Reference (IDOR) / Missing Access Control",
+            "cwe_identifier": "CWE-639",
+            "severity_level": "HIGH",
+            "cvss_score": 7.5,
+            "affected_function_or_line": "Function: check_valid_id at Line 16",
+            "technical_description": "Function 'check_valid_id' accepts sensitive parameter ['id'] but lacks authorization decorators or explicit verification calls.",
+            "recommended_remediation": "Apply strict authorization checks, decorators, and access control validation before handling object references."
+        },
+        {
+            "component_path": "docs_src/response_directly/tutorial001_py310.py",
+            "vulnerability_type": "Potential Insecure Direct Object Reference (IDOR) / Missing Access Control",
+            "cwe_identifier": "CWE-639",
+            "severity_level": "HIGH",
+            "cvss_score": 7.5,
+            "affected_function_or_line": "Function: update_item at Line 19",
+            "technical_description": "Function 'update_item' accepts sensitive parameter ['id', 'item'] but lacks authorization decorators or explicit verification calls.",
+            "recommended_remediation": "Apply strict authorization checks, decorators, and access control validation before handling object references."
+        }
+    ]
+}

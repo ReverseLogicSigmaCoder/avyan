@@ -1,0 +1,88 @@
+{
+    "engine": "SUDARSHAN ENTERPRISE AUTONOMOUS DEFENSIVE ENGINE",
+    "timestamp_utc": "2026-08-01T16:04:50.577125+00:00",
+    "target_file": "sample_app.py",
+    "target_url": "https://example.com",
+    "auth_enabled": false,
+    "logic_audit_summary": {
+        "engine": "SARATHI LLM Semantic Logic Auditor",
+        "timestamp_utc": "2026-08-01T16:04:31.200126+00:00",
+        "target_file": "sample_app.py",
+        "functions_analyzed": 1,
+        "business_logic_findings": [
+            {
+                "function": "handle_user_profile",
+                "line": 2,
+                "cwe_id": "CWE-639",
+                "title": "Potential Insecure Direct Object Reference (IDOR) / Missing Access Control",
+                "severity": "HIGH",
+                "cvss": 7.5,
+                "reasoning": "Function 'handle_user_profile' accepts sensitive parameter ['user_id'] but lacks authorization decorators or explicit verification calls."
+            }
+        ]
+    },
+    "taint_violations": [
+        {
+            "line": 5,
+            "sink_function": "os.system",
+            "tainted_argument": "cmd",
+            "cwe_id": "CWE-78",
+            "title": "Command Injection via System Call",
+            "severity": "CRITICAL",
+            "cvss": 9.8,
+            "remediation": "Sanitize and validate all external input before passing to sensitive system/database calls."
+        }
+    ],
+    "dast_audit_summary": {
+        "engine": "SUDARSHAN Dynamic Web Audit Engine (DAST)",
+        "timestamp_utc": "2026-08-01T16:04:49.534044+00:00",
+        "target_url": "https://example.com",
+        "missing_headers_count": 5,
+        "header_findings": [
+            {
+                "header_missing": "Strict-Transport-Security",
+                "cwe_id": "CWE-523",
+                "title": "Missing HSTS Header",
+                "severity": "LOW",
+                "cvss": 3.7,
+                "remediation": "Configure 'Strict-Transport-Security' in web server response headers."
+            },
+            {
+                "header_missing": "X-Frame-Options",
+                "cwe_id": "CWE-1021",
+                "title": "Missing Clickjacking Protection (X-Frame-Options)",
+                "severity": "MEDIUM",
+                "cvss": 4.3,
+                "remediation": "Configure 'X-Frame-Options' in web server response headers."
+            },
+            {
+                "header_missing": "Content-Security-Policy",
+                "cwe_id": "CWE-693",
+                "title": "Missing Content Security Policy (CSP)",
+                "severity": "MEDIUM",
+                "cvss": 5.4,
+                "remediation": "Configure 'Content-Security-Policy' in web server response headers."
+            },
+            {
+                "header_missing": "X-Content-Type-Options",
+                "cwe_id": "CWE-693",
+                "title": "Missing MIME-Sniffing Protection (X-Content-Type-Options)",
+                "severity": "LOW",
+                "cvss": 3.1,
+                "remediation": "Configure 'X-Content-Type-Options' in web server response headers."
+            },
+            {
+                "header_missing": "Access-Control-Allow-Origin",
+                "cwe_id": "CWE-942",
+                "title": "Permissive CORS Configuration Check Needed",
+                "severity": "LOW",
+                "cvss": 3.7,
+                "remediation": "Configure 'Access-Control-Allow-Origin' in web server response headers."
+            }
+        ],
+        "exposed_endpoints_count": 0,
+        "endpoint_findings": []
+    },
+    "active_parameter_findings": [],
+    "enterprise_async_batch_count": 5
+}

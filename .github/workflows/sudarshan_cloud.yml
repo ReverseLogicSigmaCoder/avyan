@@ -1,0 +1,33 @@
+name: Sudarshan Cloud Security Engine
+
+on:
+  workflow_dispatch:
+
+jobs:
+  sudarshan-audit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout Repository Securely
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Python Runtime
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Secure Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir -r requirements.txt
+
+      - name: Execute Security Probe Engine
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 sudarshan_production_engine.py

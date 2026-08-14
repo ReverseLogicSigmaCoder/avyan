@@ -1,0 +1,13 @@
+{
+    "sbom_version": "1.0_CERT_IN_COMPLIANT",
+    "timestamp": "2026-07-23 16:14:55 UTC",
+    "entity": "AVYAN_SUDARSHAN_DEFENSE",
+    "security_posture": "IMMUTABLE_HARDENED",
+    "crypto_standard": "Post-Quantum Cryptography (liboqs Ready)",
+    "modules_active": [
+        "Recon_Subdomain_Discovery",
+        "Continuous_Asset_Inventory",
+        "Exposed_Sensitive_Data_Detector",
+        "Automated_Telegram_SOAR_Alerts"
+    ]
+}

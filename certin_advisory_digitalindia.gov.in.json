@@ -1,0 +1,27 @@
+{
+    "advisory_meta": {
+        "generator": "SUDARSHAN Sovereign Shield Engine",
+        "timestamp_utc": "2026-07-24T14:19:05Z",
+        "compliance_standard": "CERT-In / NCIIPC Vulnerability Disclosure Format"
+    },
+    "target_information": {
+        "domain": "digitalindia.gov.in",
+        "scope_verification": "VERIFIED_IN_SCOPE"
+    },
+    "vulnerability_details": {
+        "cwe_id": "CWE-693",
+        "title": "Protection Mechanism Failure (Missing HTTP Security Headers)",
+        "cvss_v31_score": 0.0,
+        "severity": "INFORMATIONAL",
+        "summary": "All basic HTTP security headers are present."
+    },
+    "sanitized_live_evidence": "{\n  \"Date\": \"Fri, 24 Jul 2026 14:19:05 GMT\",\n  \"Content-Type\": \"text/html; charset=UTF-8\",\n  \"Transfer-Encoding\": \"chunked\",\n  \"Connection\": \"close\",\n  \"Set-Cookie\": \"AWSALB=YVdTbkOS59r/hmYGvSULS6Bjq4fhkSUXGEqSkMpQbkMujQy/K09JYTmHBkKx4KWHub18x3RZ0qr4aw6qe1M+d14c20GZslkCr+XV+DLr0vG/6PZ1hgTBApM1JroJ; Expires=Fri, 31 Jul 2026 14:19:05 GMT; Path=/\",\n  \"Server\": \"DigitalIndia\",\n  \"Content-Security-Policy\": \"upgrade-insecure-requests;\",\n  \"X-Frame-Options\": \"SAMEORIGIN\",\n  \"X-XSS-Protection\": \"1; mode=block\",\n  \"X-Content-Type-Options\": \"nosniff\",\n  \"Strict-Transport-Security\": \"max-age=63072000; includeSubdomains; preload\",\n  \"Referrer-Policy\": \"same-origin\",\n  \"Permissions-Policy\": \"geolocation=()\",\n  \"Last-Modified\": \"Fri, 24 Jul 2026 14:19:05 GMT\",\n  \"ETag\": \"\\\"df89f44f06f9d9d9f46d6cfe2870c822\\\"\",\n  \"Vary\": \"Accept-Encoding\",\n  \"Access-Control-Allow-Methods\": \"GET, POST\",\n  \"Access-Control-Allow-Headers\": \"Origin, Content-Type, Accept\",\n  \"Access-Control-Allow-Origin\": \"https://www.digitalindia.gov.in/\"\n}",
+    "remediation_advisory": {
+        "recommended_action": "Configure HTTP response security headers on server/WAF.",
+        "nginx_snippet": "add_header X-Frame-Options \"DENY\";\nadd_header X-Content-Type-Options \"nosniff\";\nadd_header Strict-Transport-Security \"max-age=31536000; includeSubDomains\" always;",
+        "official_references": [
+            "https://owasp.org/www-project-secure-headers/",
+            "https://cwe.mitre.org/data/definitions/693.html"
+        ]
+    }
+}

@@ -1,0 +1,24 @@
+name: Akash-Rakshak IP Isolation CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+        with:
+          persist-credentials: false
+
+    - name: Run Akash-Rakshak Core Isolation
+      run: |
+        chmod +x rakshak.sh
+        ./rakshak.sh

@@ -1,0 +1,85 @@
+{
+    "engine": "SUDARSHAN Production-Grade SAST Engine",
+    "timestamp_utc": "2026-07-24T19:44:59.025336+00:00",
+    "repository_scanned": "https://github.com/fastapi/fastapi",
+    "production_files_analyzed": 526,
+    "test_files_ignored": 601,
+    "actionable_vulnerabilities_count": 5,
+    "repository_findings": [
+        {
+            "file": "docs_src/dependencies/tutorial013_an_py310.py",
+            "logic_findings": [
+                {
+                    "function": "get_user",
+                    "line": 24,
+                    "cwe_id": "CWE-639",
+                    "title": "Potential Insecure Direct Object Reference (IDOR) / Missing Access Control",
+                    "severity": "HIGH",
+                    "cvss": 7.5,
+                    "reasoning": "Function 'get_user' accepts sensitive parameter ['user_id', 'session'] but lacks authorization decorators or explicit verification calls."
+                }
+            ],
+            "taint_findings": []
+        },
+        {
+            "file": "docs_src/dependencies/tutorial014_an_py310.py",
+            "logic_findings": [
+                {
+                    "function": "get_user",
+                    "line": 24,
+                    "cwe_id": "CWE-639",
+                    "title": "Potential Insecure Direct Object Reference (IDOR) / Missing Access Control",
+                    "severity": "HIGH",
+                    "cvss": 7.5,
+                    "reasoning": "Function 'get_user' accepts sensitive parameter ['user_id', 'session'] but lacks authorization decorators or explicit verification calls."
+                }
+            ],
+            "taint_findings": []
+        },
+        {
+            "file": "docs_src/encoder/tutorial001_py310.py",
+            "logic_findings": [
+                {
+                    "function": "update_item",
+                    "line": 20,
+                    "cwe_id": "CWE-639",
+                    "title": "Potential Insecure Direct Object Reference (IDOR) / Missing Access Control",
+                    "severity": "HIGH",
+                    "cvss": 7.5,
+                    "reasoning": "Function 'update_item' accepts sensitive parameter ['id', 'item'] but lacks authorization decorators or explicit verification calls."
+                }
+            ],
+            "taint_findings": []
+        },
+        {
+            "file": "docs_src/query_params_str_validations/tutorial015_an_py310.py",
+            "logic_findings": [
+                {
+                    "function": "check_valid_id",
+                    "line": 16,
+                    "cwe_id": "CWE-639",
+                    "title": "Potential Insecure Direct Object Reference (IDOR) / Missing Access Control",
+                    "severity": "HIGH",
+                    "cvss": 7.5,
+                    "reasoning": "Function 'check_valid_id' accepts sensitive parameter ['id'] but lacks authorization decorators or explicit verification calls."
+                }
+            ],
+            "taint_findings": []
+        },
+        {
+            "file": "docs_src/response_directly/tutorial001_py310.py",
+            "logic_findings": [
+                {
+                    "function": "update_item",
+                    "line": 19,
+                    "cwe_id": "CWE-639",
+                    "title": "Potential Insecure Direct Object Reference (IDOR) / Missing Access Control",
+                    "severity": "HIGH",
+                    "cvss": 7.5,
+                    "reasoning": "Function 'update_item' accepts sensitive parameter ['id', 'item'] but lacks authorization decorators or explicit verification calls."
+                }
+            ],
+            "taint_findings": []
+        }
+    ]
+}

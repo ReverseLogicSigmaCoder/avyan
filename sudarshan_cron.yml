@@ -1,0 +1,38 @@
+name: SUDARSHAN Automated Real SCADA Scan
+
+on:
+  schedule:
+    # Har 6 ghante mein automatically chalega
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # Direct Manual Trigger Button ke liye
+
+jobs:
+  run-scada-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Network Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install scapy requests python-nmap pymodbus
+
+      - name: Execute Live SCADA Scanner
+        run: |
+          python real_scada_scanner.py
+
+      - name: Commit & Push Scan Telemetry
+        run: |
+          git config --global user.name "SUDARSHAN-Automated-Bot"
+          git config --global user.email "bot@project-avyan.internal"
+          git add .
+          git commit -m "Automated SCADA Audit Completed [CI/CD]" || exit 0
+          git push
+          

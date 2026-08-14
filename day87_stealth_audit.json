@@ -1,0 +1,14 @@
+{
+    "engine": "SUDARSHAN Day 87 Stealth Engine",
+    "timestamp": "2026-07-25T18:15:37.530037+00:00",
+    "stealth_scan_results": {
+        "80": "STEALTH_CHECKED_PASS",
+        "443": "STEALTH_CHECKED_PASS",
+        "8080": "STEALTH_CHECKED_PASS"
+    },
+    "honeypot_sandbox": {
+        "decoy_port": 2222,
+        "status": "ACTIVE_AND_WAITING",
+        "alert": "Any connection attempt to this port triggers immediate attacker profiling."
+    }
+}

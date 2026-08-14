@@ -1,0 +1,2 @@
+id,timestamp,target_identity,monitored_domain,subdomain_count,ioc_status,raw_summary
+1,2026-07-23 12:07:23 UTC,ravindrachoudhary9653@gmail.com,nic.in,0,IOC Match Detected,"Subdomains: 0, Threats: 1"
